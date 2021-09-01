@@ -14,7 +14,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main {
 
@@ -41,7 +41,7 @@ public class Main {
         //File logDirectory = new File("C:\\Users\\" + System.getProperty("user.home") + "\\Documents\\Overwatch\\Workshop\\"); // where the files are
         File logDirectory = new File("C:\\Users\\Nicholas\\Documents\\Overwatch\\Workshop\\"); // where the files are
         File latestLog;
-        ConcurrentLinkedQueue<String> logStrings = new ConcurrentLinkedQueue<>();
+        LinkedBlockingQueue<String> logStrings = new LinkedBlockingQueue<>();
         GameMatch currentMatch = new GameMatch();
 
 
@@ -67,7 +67,7 @@ public class Main {
             parserThread.start();
 
             // 4. Setup spreadsheet access
-            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch,10000);
+            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch,5000);
             Thread spreadsheetThread = new Thread(spreadsheetUpdater);
             logger.debug("Starting thread for spreadsheet Communication");
             spreadsheetThread.start();

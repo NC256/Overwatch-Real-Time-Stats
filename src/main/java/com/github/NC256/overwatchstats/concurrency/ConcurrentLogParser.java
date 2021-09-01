@@ -6,22 +6,22 @@ import com.github.NC256.overwatchstats.logs.LogMessageParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ConcurrentLogParser implements Runnable{
 
-    private final ConcurrentLinkedQueue<String> strings;
+    private final LinkedBlockingQueue<String> strings;
     private final GameMatch match;
     private final Logger logger = LogManager.getLogger(this);
 
 
-    public ConcurrentLogParser(ConcurrentLinkedQueue<String> strings, GameMatch match){
+    public ConcurrentLogParser(LinkedBlockingQueue<String> strings, GameMatch match){
         logger.info("Instantiated with queue and GameMatch instance.");
         this.strings = strings;
         this.match = match;
     }
 
-    public ConcurrentLogParser(ConcurrentLinkedQueue<String> strings){
+    public ConcurrentLogParser(LinkedBlockingQueue<String> strings){
         logger.info("Instantiated with one queue.");
         this.strings = strings;
         this.match = new GameMatch();
@@ -34,13 +34,11 @@ public class ConcurrentLogParser implements Runnable{
     @Override
     public void run() {
         logger.debug("Entering run()");
-        String line = null;
-        LogMessage message = null;
-        while(true){
-            //TODO this line is causing high CPU usage, responsible for ~99% of the program's total CPU cycles
-            // during one profiler run - need some kind of blocking queue?
-            line = strings.poll();
-            if (line != null){
+        try {
+            String line = null;
+            LogMessage message = null;
+            while (true) {
+                line = strings.take(); // can be interrupted
                 message = LogMessageParser.parseLine(line);
                 if (message != null){
                     synchronized (match){ // Need to make sure nothing is reading data while we are in the middle of writing it
@@ -48,10 +46,9 @@ public class ConcurrentLogParser implements Runnable{
                     }
                 }
             }
-            if (Thread.currentThread().isInterrupted()){
-                logger.debug("Received Interrupt!");
-                return;
-            }
+        }
+        catch (InterruptedException e){
+            logger.warn(e);
         }
     }
 }

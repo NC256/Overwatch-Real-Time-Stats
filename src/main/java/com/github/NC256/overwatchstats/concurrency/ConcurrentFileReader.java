@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This class provides file parsing that happens in real-time.
@@ -21,22 +21,22 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ConcurrentFileReader implements Runnable{
 
     private final File log;
-    private final ConcurrentLinkedQueue<String> strings;
+    private final LinkedBlockingQueue<String> strings;
     private final Logger logger = LogManager.getLogger(this);
 
     public ConcurrentFileReader(File log) {
         logger.info("Instantiated pointing to file " + log.getAbsolutePath());
         this.log = log;
-        strings = new ConcurrentLinkedQueue<String>();
+        strings = new LinkedBlockingQueue<String>();
     }
 
-    public ConcurrentFileReader(File log, ConcurrentLinkedQueue<String> strings){
+    public ConcurrentFileReader(File log, LinkedBlockingQueue<String> strings){
         logger.info("Instantiated with Queue and pointing to file " + log.getAbsolutePath());
         this.log = log;
         this.strings = strings;
     }
 
-    public ConcurrentLinkedQueue<String> getSharedQueue (){
+    public LinkedBlockingQueue<String> getSharedQueue (){
         return strings;
     }
 
@@ -49,11 +49,12 @@ public class ConcurrentFileReader implements Runnable{
             BufferedReader lineReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             while (true) {
                 String line = lineReader.readLine();
-                if (line != null) {
-                    strings.add(line);
+                if (line == null){ // TODO blocking file reads are apparently really difficult, is this the best solution?
+                    Thread.sleep(250);
+                    continue;
                 }
-                if (Thread.currentThread().isInterrupted()){
-                    throw new InterruptedException();
+                if (line != null) {
+                    strings.put(line); // can be interrupted
                 }
             }
         }

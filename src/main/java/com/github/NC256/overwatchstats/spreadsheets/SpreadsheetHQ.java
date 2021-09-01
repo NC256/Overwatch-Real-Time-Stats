@@ -8,6 +8,7 @@ import java.util.List;
 
 public class SpreadsheetHQ {
 
+    //TODO delete this google sheet before publishing this code on Github :p
     public static final String spreadsheetID = "1iWptCYpfXHBQk6ywsYMzx0kdGqrfIj_pbXlePLtLpFQ";
     public static final String sheetName = "Sheet1";
     public static final String range = "!B2";
