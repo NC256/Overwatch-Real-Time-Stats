@@ -5,6 +5,7 @@ import com.github.NC256.overwatchstats.concurrency.ConcurrentFileWatcher;
 import com.github.NC256.overwatchstats.concurrency.ConcurrentLogParser;
 import com.github.NC256.overwatchstats.concurrency.ConcurrentSpreadsheetUpdater;
 import com.github.NC256.overwatchstats.gamedata.GameMatch;
+import com.github.NC256.overwatchstats.spreadsheets.SpreadsheetInstance;
 import com.github.NC256.overwatchstats.spreadsheets.TalkToGoogle;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -12,8 +13,11 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main {
@@ -32,14 +36,25 @@ public class Main {
         logger.fatal("Fatal Message!");
         System.out.println("Logger should have already logged");
 
-        boolean liveMode = true; // Always automatically switch to newly created files.
         boolean googleSheetsLive = true; // Transmit to Google Sheets
         if (googleSheetsLive){
             TalkToGoogle.initalize();
         }
 
+
+        if (!new File("properties.properties").exists()) {
+            generatePropertiesFile();
+            logger.fatal("Properties file not found, generating one. Please set it's values now.");
+            System.exit(-1);
+        }
+        Properties preferences = loadAndValidateProperties();
+
+        boolean liveMode = true; // Always automatically switch to newly created files.
+
+
         //File logDirectory = new File("C:\\Users\\" + System.getProperty("user.home") + "\\Documents\\Overwatch\\Workshop\\"); // where the files are
-        File logDirectory = new File("C:\\Users\\Nicholas\\Documents\\Overwatch\\Workshop\\"); // where the files are
+        //File logDirectory = new File("C:\\Users\\Nicholas\\Documents\\Overwatch\\Workshop\\"); // where the files are
+        File logDirectory = new File(preferences.getProperty("Overwatch_Log_Directory"));
         File latestLog;
         LinkedBlockingQueue<String> logStrings = new LinkedBlockingQueue<>();
         GameMatch currentMatch = new GameMatch();
@@ -67,7 +82,10 @@ public class Main {
             parserThread.start();
 
             // 4. Setup spreadsheet access
-            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch,5000);
+            SpreadsheetInstance sheetInstance = new SpreadsheetInstance(preferences.getProperty("Google_Sheet_ID"),
+                    preferences.getProperty("Google_Sheet_Current_Worksheet"),
+                    preferences.getProperty("Google_Sheet_Insertion_Cell"));
+            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch, sheetInstance,5000);
             Thread spreadsheetThread = new Thread(spreadsheetUpdater);
             logger.debug("Starting thread for spreadsheet Communication");
             spreadsheetThread.start();
@@ -75,7 +93,7 @@ public class Main {
             while (!watcher.hasEventOccurred()){ // While no new file has appeared on sensors
                 // threads are doing everything for us now...
 
-                //TODO Main needs to know if any of the threads have crashed or encountered errors
+                //TODO Thread overhaul with a Pool and/or Futures of some kind along with error handling. Something to keep Main from busy waiting
                 Thread.sleep(2000);
             }
             // New file must have appeared, lets reboot things
@@ -114,6 +132,32 @@ public class Main {
         }
         return latest;
     }
+
+    static void generatePropertiesFile () throws IOException {
+        Properties preferences = new Properties();
+        preferences.setProperty("Google_Sheet_ID","");
+        preferences.setProperty("Google_Sheet_Current_Worksheet", "Sheet1");
+        preferences.setProperty("Google_Sheet_Insertion_Cell", "B2");
+        preferences.setProperty("Overwatch_Log_Directory", "C:\\Users\\USERNAME\\Documents\\Overwatch\\Workshop\\");
+        preferences.store(new FileWriter(new File("properties.properties")), "Documentation on Github.");
+        return;
+    }
+
+    static Properties loadAndValidateProperties() throws IOException {
+        Properties preferences = new Properties();
+        preferences.load(new FileReader(new File("properties.properties")));
+        if (preferences.stringPropertyNames().size() != 4){
+            logger.fatal("Invalid number of properties, is properties file out of date? Perhaps delete it and let the program generate a new one.");
+            System.exit(-1);
+        }
+        if (!new File(preferences.getProperty("Overwatch_Log_Directory")).exists()){
+            logger.fatal("Cannot find that log directory! Check your formatting.");
+            System.exit(-1);
+        }
+        //TODO how to test API communication is working?
+        return preferences;
+    }
+
 
 }
 
