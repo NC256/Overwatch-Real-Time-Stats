@@ -1,13 +1,11 @@
 package com.github.NC256.overwatchstats.gamedata;
 
-import com.github.NC256.overwatchstats.Hero;
-
 import java.util.List;
 
 public class CanonicalHero implements Hero {
 
-    final String name;
-    final List<CanonicalAbility> abilityNames;
+    private final String name;
+    private final List<CanonicalAbility> abilityNames;
 
     public CanonicalHero(String name, List<CanonicalAbility> abilityNames){
         this.name = name;
@@ -19,13 +17,13 @@ public class CanonicalHero implements Hero {
         return name;
     }
 
-    public String getAbilityName (OverwatchEventType eventType){
+    public String getAbilityName (OverwatchAbilityEvent eventType){
         for (CanonicalAbility abilityName : abilityNames) {
             if (abilityName.eventType == eventType){
                 return abilityName.abilityName;
             }
         }
-        return "Didn't find mappable name";
+        return "UNKNOWN_ABILITY";
     }
 }
 

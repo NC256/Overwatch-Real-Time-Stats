@@ -5,6 +5,7 @@ import com.github.NC256.overwatchstats.gamedata.Player;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class SpreadsheetInstance {
@@ -23,16 +24,20 @@ public class SpreadsheetInstance {
     }
 
     public void collectAndTransmit(GameMatch match) throws IOException {
-        List<List<Object>> data = SpreadsheetUtils.constructShapedList(4,12);
+        List<List<Object>> data = SpreadsheetUtils.constructShapedList(7,12);
 
         List<Player> players = match.getPlayers();
+        System.out.println(Arrays.toString(players.toArray()));
         try {
             for (int i = 0; i < 12; i++) {
                 data.get(0).add(i, players.get(i).getName());
                 data.get(1).add(i, players.get(i).getTotalKills());
                 data.get(2).add(i, players.get(i).getTotalDeaths());
+                data.get(3).add(i, players.get(i).getTotalFinalBlows());
+                data.get(4).add(i, players.get(i).getTotalDamageDone());
+                data.get(5).add(i, players.get(i).getTotalHealingDone());
             }
-            data.get(3).add(0, System.currentTimeMillis());
+            data.get(6).add(0, System.currentTimeMillis());
         }
         catch (Exception e){
             System.out.println("Error packing data for spreadsheet!");

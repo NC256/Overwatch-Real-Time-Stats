@@ -1,4 +1,4 @@
-package com.github.NC256.overwatchstats;
+package com.github.NC256.overwatchstats.gamedata;
 
 public interface Hero {
 

@@ -1,8 +1,8 @@
 package com.github.NC256.overwatchstats.concurrency;
 
 import com.github.NC256.overwatchstats.gamedata.GameMatch;
-import com.github.NC256.overwatchstats.logs.LogMessage;
-import com.github.NC256.overwatchstats.logs.LogMessageParser;
+import com.github.NC256.overwatchstats.logs.LogPatternParser;
+import com.github.NC256.overwatchstats.logs.patterns.LogPattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,12 +21,6 @@ public class ConcurrentLogParser implements Runnable{
         this.match = match;
     }
 
-    public ConcurrentLogParser(LinkedBlockingQueue<String> strings){
-        logger.info("Instantiated with one queue.");
-        this.strings = strings;
-        this.match = new GameMatch();
-    }
-
     public GameMatch getGameInstance (){
         return match;
     }
@@ -36,13 +30,18 @@ public class ConcurrentLogParser implements Runnable{
         logger.debug("Entering run()");
         try {
             String line = null;
-            LogMessage message = null;
+            LogPattern message = null;
             while (true) {
                 line = strings.take(); // can be interrupted
-                message = LogMessageParser.parseLine(line);
+                message = LogPatternParser.parseLine(line);
                 if (message != null){
                     synchronized (match){ // Need to make sure nothing is reading data while we are in the middle of writing it
-                        message.parseStats(match);
+                        try {
+                            message.updateStats(match);
+                        }
+                        catch (Exception e){
+                            logger.warn("Unable to update stats for the following: " + line);
+                        }
                     }
                 }
             }

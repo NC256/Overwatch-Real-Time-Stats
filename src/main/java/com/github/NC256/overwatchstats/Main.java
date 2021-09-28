@@ -4,7 +4,12 @@ import com.github.NC256.overwatchstats.concurrency.ConcurrentFileReader;
 import com.github.NC256.overwatchstats.concurrency.ConcurrentFileWatcher;
 import com.github.NC256.overwatchstats.concurrency.ConcurrentLogParser;
 import com.github.NC256.overwatchstats.concurrency.ConcurrentSpreadsheetUpdater;
+import com.github.NC256.overwatchstats.gamedata.CanonicalGameData;
+import com.github.NC256.overwatchstats.gamedata.CanonicalHero;
+import com.github.NC256.overwatchstats.gamedata.CanonicalMode;
 import com.github.NC256.overwatchstats.gamedata.GameMatch;
+import com.github.NC256.overwatchstats.gamedata.ParseHeroData;
+import com.github.NC256.overwatchstats.gamedata.ParseModeData;
 import com.github.NC256.overwatchstats.spreadsheets.SpreadsheetInstance;
 import com.github.NC256.overwatchstats.spreadsheets.TalkToGoogle;
 import org.apache.logging.log4j.Level;
@@ -17,6 +22,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -26,7 +32,10 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException, GeneralSecurityException {
 
-        Configurator.setRootLevel(Level.ALL);
+        //TODO if the INITIAL log message is not the first message, then prior messages could be parsed before
+        // player names have been ingested, leading to errors when trying to parse ANYTHING
+
+        Configurator.setRootLevel(Level.WARN);
 
         logger.trace("Trace Message!");
         logger.debug("Debug Message!");
@@ -41,13 +50,24 @@ public class Main {
             TalkToGoogle.initalize();
         }
 
-
         if (!new File("properties.properties").exists()) {
             generatePropertiesFile();
             logger.fatal("Properties file not found, generating one. Please set it's values now.");
             System.exit(-1);
         }
         Properties preferences = loadAndValidateProperties();
+
+        List<CanonicalHero> heroData = ParseHeroData.parse(); // Canonical game reference data
+        if (heroData == null){
+            logger.fatal("Unable to parse hero reference data.");
+            System.exit(-1);
+        }
+
+        List<CanonicalMode> modeData = ParseModeData.parse();
+        if (modeData == null){
+            logger.fatal("Unable to parse mode reference data.");
+            System.exit(-1);
+        }
 
         boolean liveMode = true; // Always automatically switch to newly created files.
 
@@ -57,7 +77,7 @@ public class Main {
         File logDirectory = new File(preferences.getProperty("Overwatch_Log_Directory"));
         File latestLog;
         LinkedBlockingQueue<String> logStrings = new LinkedBlockingQueue<>();
-        GameMatch currentMatch = new GameMatch();
+        GameMatch currentMatch = new GameMatch(new CanonicalGameData(heroData, modeData));
 
 
         while (true) {

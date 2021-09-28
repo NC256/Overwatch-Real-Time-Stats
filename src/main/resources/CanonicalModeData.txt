@@ -1,0 +1,22 @@
+Assault
+team
+Control
+team
+Escort
+team
+Hybrid
+team
+Bounty Hunter
+free-for-all
+Capture The Flag
+team
+Deathmatch
+free-for-all
+Elimination
+team
+Team Deathmatch
+team
+Skirmish
+team
+Practice Range
+team
