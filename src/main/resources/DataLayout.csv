@@ -1,0 +1,9 @@
+﻿Player#1,Player#2,Player#3,Player#4,Player#5,Player#6,Player#7,Player#8,Player#9,Player#10,Player#11,Player#12
+Player#1.elims,Player#2.elims,Player#3.elims,Player#4.elims,Player#5.elims,Player#6.elims,Player#7.elims,Player#8.elims,Player#9.elims,Player#10.elims,Player#11.elims,Player#12.elims
+Player#1.deaths,Player#2.deaths,Player#3.deaths,Player#4.deaths,Player#5.deaths,Player#6.deaths,Player#7.deaths,Player#8.deaths,Player#9.deaths,Player#10.deaths,Player#11.deaths,Player#12.deaths
+Player#1.final_blows,Player#2.final_blows,Player#3.final_blows,Player#4.final_blows,Player#5.final_blows,Player#6.final_blows,Player#7.final_blows,Player#8.final_blows,Player#9.final_blows,Player#10.final_blows,Player#11.final_blows,Player#12.final_blows
+Player#1.damage_total,Player#2.damage_total,Player#3.damage_total,Player#4.damage_total,Player#5.damage_total,Player#6.damage_total,Player#7.damage_total,Player#8.damage_total,Player#9.damage_total,Player#10.damage_total,Player#11.damage_total,Player#12.damage_total
+Player#1.healing_total,Player#2.healing_total,Player#3.healing_total,Player#4.healing_total,Player#5.healing_total,Player#6.healing_total,Player#7.healing_total,Player#8.healing_total,Player#9.healing_total,Player#10.healing_total,Player#11.healing_total,Player#12.healing_total
+map_name,mode_type,,,,,,,,,,
+,,,,,,,,,,,
+,debug_time,,,,,,,,,,
