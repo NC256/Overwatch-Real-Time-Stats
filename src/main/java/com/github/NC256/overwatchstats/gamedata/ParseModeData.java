@@ -23,7 +23,6 @@ public class ParseModeData {
             for (int i = 0; i < lines.size(); i += 2) { // for lines two at a time
                 String modeName = lines.get(i);
                 String teamOrFFA = lines.get(i+1);
-                System.out.println(teamOrFFA);
                 boolean teambased;
                 if (teamOrFFA.equals("team")){
                     teambased = true;

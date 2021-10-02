@@ -32,10 +32,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException, GeneralSecurityException {
 
-        //TODO if the INITIAL log message is not the first message, then prior messages could be parsed before
-        // player names have been ingested, leading to errors when trying to parse ANYTHING
-
-        Configurator.setRootLevel(Level.WARN);
+        Configurator.setRootLevel(Level.INFO);
 
         logger.trace("Trace Message!");
         logger.debug("Debug Message!");
@@ -76,7 +73,7 @@ public class Main {
         //File logDirectory = new File("C:\\Users\\Nicholas\\Documents\\Overwatch\\Workshop\\"); // where the files are
         File logDirectory = new File(preferences.getProperty("Overwatch_Log_Directory"));
         File latestLog;
-        LinkedBlockingQueue<String> logStrings = new LinkedBlockingQueue<>();
+        LinkedBlockingQueue<String> logStrings;
         GameMatch currentMatch = new GameMatch(new CanonicalGameData(heroData, modeData));
 
 
@@ -87,14 +84,18 @@ public class Main {
             logger.debug("Starting Thread for ConcurrentFileWatcher");
             watcherThread.start();
 
-            // 2. Manually find the latest file
+            // 2. Manually find the latest file and instantiate message passing queue for them
             latestLog = getLatestLogFile(logDirectory);
+            logStrings = new LinkedBlockingQueue<>();
 
             // 3. Setup parsing system
             ConcurrentFileReader reader = new ConcurrentFileReader(latestLog,logStrings);
             Thread readerThread = new Thread(reader);
             logger.debug("Starting Thread for ConcurrentFileReader");
             readerThread.start();
+
+            // New game has started, need a new instance of GameMatch
+            currentMatch = new GameMatch(new CanonicalGameData(heroData, modeData));
 
             ConcurrentLogParser parser = new ConcurrentLogParser(logStrings, currentMatch);
             Thread parserThread = new Thread(parser);
@@ -105,7 +106,7 @@ public class Main {
             SpreadsheetInstance sheetInstance = new SpreadsheetInstance(preferences.getProperty("Google_Sheet_ID"),
                     preferences.getProperty("Google_Sheet_Current_Worksheet"),
                     preferences.getProperty("Google_Sheet_Insertion_Cell"));
-            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch, sheetInstance,5000);
+            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch, sheetInstance,1200);
             Thread spreadsheetThread = new Thread(spreadsheetUpdater);
             logger.debug("Starting thread for spreadsheet Communication");
             spreadsheetThread.start();
@@ -147,7 +148,7 @@ public class Main {
             }
         }
         if (latest == null){
-            System.out.println("Couldn't find the latest File.");
+            logger.fatal("Couldn't find the latest File.");
             System.exit(-1);
         }
         return latest;
