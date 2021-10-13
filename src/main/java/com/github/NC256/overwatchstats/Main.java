@@ -32,7 +32,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException, GeneralSecurityException {
 
-        Configurator.setRootLevel(Level.INFO);
+        Configurator.setRootLevel(Level.DEBUG);
 
         logger.trace("Trace Message!");
         logger.debug("Debug Message!");
@@ -41,11 +41,6 @@ public class Main {
         logger.error("Error Message!");
         logger.fatal("Fatal Message!");
         System.out.println("Logger should have already logged");
-
-        boolean googleSheetsLive = true; // Transmit to Google Sheets
-        if (googleSheetsLive){
-            TalkToGoogle.initalize();
-        }
 
         if (!new File("properties.properties").exists()) {
             generatePropertiesFile();
@@ -67,14 +62,15 @@ public class Main {
         }
 
         boolean liveMode = true; // Always automatically switch to newly created files.
+        boolean googleSheetsLive = true; // Transmit to Google Sheets
+        if (googleSheetsLive){
+            TalkToGoogle.initalize();
+        }
 
-
-        //File logDirectory = new File("C:\\Users\\" + System.getProperty("user.home") + "\\Documents\\Overwatch\\Workshop\\"); // where the files are
-        //File logDirectory = new File("C:\\Users\\Nicholas\\Documents\\Overwatch\\Workshop\\"); // where the files are
         File logDirectory = new File(preferences.getProperty("Overwatch_Log_Directory"));
         File latestLog;
         LinkedBlockingQueue<String> logStrings;
-        GameMatch currentMatch = new GameMatch(new CanonicalGameData(heroData, modeData));
+        GameMatch currentMatch;
 
 
         while (true) {
@@ -84,19 +80,20 @@ public class Main {
             logger.debug("Starting Thread for ConcurrentFileWatcher");
             watcherThread.start();
 
-            // 2. Manually find the latest file and instantiate message passing queue for them
+            // 2. Manually find the latest file and instantiate message passing queue for it
             latestLog = getLatestLogFile(logDirectory);
             logStrings = new LinkedBlockingQueue<>();
 
-            // 3. Setup parsing system
+            // 3. Set up parsing thread to read from the file directly
             ConcurrentFileReader reader = new ConcurrentFileReader(latestLog,logStrings);
             Thread readerThread = new Thread(reader);
             logger.debug("Starting Thread for ConcurrentFileReader");
             readerThread.start();
 
-            // New game has started, need a new instance of GameMatch
+            // Instantiate GameMatch to keep track of all data for current match
             currentMatch = new GameMatch(new CanonicalGameData(heroData, modeData));
 
+            // Instantiate thread to parse strings from FileReader
             ConcurrentLogParser parser = new ConcurrentLogParser(logStrings, currentMatch);
             Thread parserThread = new Thread(parser);
             logger.debug("Starting Thread for ConcurrentLogParser");
@@ -106,7 +103,7 @@ public class Main {
             SpreadsheetInstance sheetInstance = new SpreadsheetInstance(preferences.getProperty("Google_Sheet_ID"),
                     preferences.getProperty("Google_Sheet_Current_Worksheet"),
                     preferences.getProperty("Google_Sheet_Insertion_Cell"));
-            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch, sheetInstance,1200);
+            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch, sheetInstance,Integer.parseInt(preferences.getProperty("Transmission_Interval")));
             Thread spreadsheetThread = new Thread(spreadsheetUpdater);
             logger.debug("Starting thread for spreadsheet Communication");
             spreadsheetThread.start();
@@ -131,7 +128,6 @@ public class Main {
             spreadsheetThread.join();
             logger.info("Main loop restarting!");
         }
-        //logger.info("Program exiting!");
     }
 
     static File getLatestLogFile (File logDirectory){
@@ -148,7 +144,7 @@ public class Main {
             }
         }
         if (latest == null){
-            logger.fatal("Couldn't find the latest File.");
+            logger.fatal("Couldn't find the latest file.");
             System.exit(-1);
         }
         return latest;
@@ -160,6 +156,7 @@ public class Main {
         preferences.setProperty("Google_Sheet_Current_Worksheet", "Sheet1");
         preferences.setProperty("Google_Sheet_Insertion_Cell", "B2");
         preferences.setProperty("Overwatch_Log_Directory", "C:\\Users\\USERNAME\\Documents\\Overwatch\\Workshop\\");
+        preferences.setProperty("Transmission_Interval", "2000");
         preferences.store(new FileWriter(new File("properties.properties")), "Documentation on Github.");
         return;
     }
@@ -167,7 +164,7 @@ public class Main {
     static Properties loadAndValidateProperties() throws IOException {
         Properties preferences = new Properties();
         preferences.load(new FileReader(new File("properties.properties")));
-        if (preferences.stringPropertyNames().size() != 4){
+        if (preferences.stringPropertyNames().size() != 5){
             logger.fatal("Invalid number of properties, is properties file out of date? Perhaps delete it and let the program generate a new one.");
             System.exit(-1);
         }
@@ -175,10 +172,12 @@ public class Main {
             logger.fatal("Cannot find that log directory! Check your formatting.");
             System.exit(-1);
         }
+        if (Integer.parseInt(preferences.getProperty("Transmission_Interval")) < 1100){
+            logger.error("Cannot transmit to the spreadsheet more frequently than every 1100 milliseconds. Current Transmission_Interval is too short!");
+        }
         //TODO how to test API communication is working?
         return preferences;
     }
-
 
 }
 

@@ -18,7 +18,13 @@ public class ConcurrentSpreadsheetUpdater implements Runnable{
     public ConcurrentSpreadsheetUpdater (GameMatch match, SpreadsheetInstance sheet, int transmitIntervalMilliseconds){
         this.match = match;
         this.sheet = sheet;
-        this.transmitIntervalMilliseconds = transmitIntervalMilliseconds;
+        if (transmitIntervalMilliseconds < 1100){
+            logger.debug("Received transmission interval too short, defaulting to 1100ms.");
+            this.transmitIntervalMilliseconds = 1100;
+        }
+        else {
+            this.transmitIntervalMilliseconds = transmitIntervalMilliseconds;
+        }
     }
 
     //TODO might be better to use a ScheduledExecutorService?
@@ -29,7 +35,7 @@ public class ConcurrentSpreadsheetUpdater implements Runnable{
         while (true) {
             try {
                 Thread.sleep(transmitIntervalMilliseconds);
-                synchronized (match){
+                synchronized (match){ // Don't want stats changing while collecting them for transmit
                     sheet.collectAndTransmit(match);
                 }
             }
