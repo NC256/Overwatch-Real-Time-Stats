@@ -9,10 +9,9 @@ public enum OverwatchAbilityEvent {
 
     private static final Logger logger = LogManager.getLogger(OverwatchAbilityEvent.class);
 
-
     @Override
     public String toString() {
-        switch (this){
+        switch (this) {
             case PRIMARY_FIRE:
                 return "Primary Fire";
             case SECONDARY_FIRE:
@@ -33,8 +32,8 @@ public enum OverwatchAbilityEvent {
         }
     }
 
-    public static OverwatchAbilityEvent stringToEnum (String name){
-        switch (name.toLowerCase()){
+    public static OverwatchAbilityEvent stringToEnum(String name) {
+        switch (name.toLowerCase()) {
             case "primary fire":
                 return OverwatchAbilityEvent.PRIMARY_FIRE;
             case "secondary fire":
@@ -57,8 +56,8 @@ public enum OverwatchAbilityEvent {
         }
     }
 
-    public static OverwatchAbilityEvent fromLogType (LogPatternType type){
-        switch (type){
+    public static OverwatchAbilityEvent fromLogType(LogPatternType type) {
+        switch (type) {
             case ABILITY_1:
                 return OverwatchAbilityEvent.ABILITY_1;
             case ABILITY_2:

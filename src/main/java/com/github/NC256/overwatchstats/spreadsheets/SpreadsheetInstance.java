@@ -9,6 +9,10 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * This class represents a line of communication with a particular Google Sheet.
+ * It knows what data needs to be sent and in what format.
+ */
 public class SpreadsheetInstance {
 
     private static final Logger logger = LogManager.getLogger(SpreadsheetInstance.class);
@@ -17,17 +21,17 @@ public class SpreadsheetInstance {
     private String worksheetname;
     private String range;
 
-    public SpreadsheetInstance(String spreadsheetID, String worksheetName, String range){
+    public SpreadsheetInstance(String spreadsheetID, String worksheetName, String range) {
         this.spreadsheetID = spreadsheetID;
         this.worksheetname = worksheetName;
         this.range = range;
-        if (range.charAt(0) != '!'){ //TODO parse elsewhere
+        if (range.charAt(0) != '!') { //TODO parse elsewhere
             this.range = "!" + range;
         }
     }
 
     public void collectAndTransmit(GameMatch match) throws IOException {
-        List<List<Object>> data = SpreadsheetUtils.constructShapedList(7,12);
+        List<List<Object>> data = SpreadsheetUtils.constructShapedList(7, 12);
 
         List<Player> players = match.getPlayers();
         try {
@@ -40,17 +44,16 @@ public class SpreadsheetInstance {
                 data.get(5).add(i, Math.round(players.get(i).getTotalHealingDone()));
             }
             data.get(6).add(0, System.currentTimeMillis());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             logger.error("Error packing data for spreadsheet!");
             logger.error(e);
             return;
         }
-        TalkToGoogle.sendStats(spreadsheetID, worksheetname+range,data);
+        TalkToGoogle.sendStats(spreadsheetID, worksheetname + range, data);
     }
 
     public void testTransmission() throws IOException {
-        List<List<Object>> testData = SpreadsheetUtils.constructShapedList(3,3);
+        List<List<Object>> testData = SpreadsheetUtils.constructShapedList(3, 3);
         for (List<Object> list : testData) {
             for (Object o : list) {
                 o = "TEST";
@@ -58,7 +61,6 @@ public class SpreadsheetInstance {
         }
         UpdateValuesResponse uvr = TalkToGoogle.sendStats(spreadsheetID, range, testData);
     }
-
 
     public String getSpreadsheetID() {
         return spreadsheetID;

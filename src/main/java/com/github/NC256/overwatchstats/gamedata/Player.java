@@ -6,13 +6,16 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a player in a game and lists all the heroes they've played, the team they're on, etc
+ */
 public class Player {
 
-    private static final Logger logger = LogManager.getLogger(Player.class);
+    private final Logger logger = LogManager.getLogger(this);
+
     private final CanonicalGameData gameData;
     private final String name;
     private PlayerTeam team;
-
     private final List<PlayerHero> playedHeroes = new ArrayList<>();
 
 
@@ -26,7 +29,7 @@ public class Player {
         return team;
     }
 
-    public void setTeam (PlayerTeam team){
+    public void setTeam(PlayerTeam team) {
         this.team = team;
     }
 
@@ -34,7 +37,7 @@ public class Player {
         return name;
     }
 
-    private void addHero(CanonicalHero hero){
+    private void addHero(CanonicalHero hero) {
         playedHeroes.add(new PlayerHero(hero));
     }
 
@@ -42,19 +45,18 @@ public class Player {
         return playedHeroes;
     }
 
-    public PlayerHero getHeroByName(String name){
+    public PlayerHero getHeroByName(String name) {
         for (PlayerHero h : playedHeroes) {
-            if (h.getHero().getName().equals(name)){
+            if (h.getHero().getName().equals(name)) {
                 return h;
             }
         }
         // Hero not found, time to add to the player's ongoing list
         CanonicalHero newHero = gameData.getCanonicalHeroByName(name);
-        if (newHero == null){
+        if (newHero == null) {
             logger.error("Nonexistent hero name " + name + " tried to be added.");
             return null;
-        }
-        else{
+        } else {
             PlayerHero current = new PlayerHero(newHero);
             playedHeroes.add(current);
             return current;
@@ -70,15 +72,15 @@ public class Player {
         return playedHeroes.stream().mapToDouble(PlayerHero::getHealingDone).sum();
     }
 
-    public int getTotalKills(){
+    public int getTotalKills() {
         return playedHeroes.stream().mapToInt(PlayerHero::getElims).sum();
     }
 
-    public int getTotalDeaths(){
+    public int getTotalDeaths() {
         return playedHeroes.stream().mapToInt(PlayerHero::getDeaths).sum();
     }
 
-    public int getTotalFinalBlows(){
+    public int getTotalFinalBlows() {
         return playedHeroes.stream().mapToInt(PlayerHero::getFinalBlows).sum();
     }
 }

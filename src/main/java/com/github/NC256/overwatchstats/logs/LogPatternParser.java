@@ -11,6 +11,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 
+/**
+ * This is something of a static factory class that tries to instantiate LogPattern objects given
+ * a string out of the log file. I've tried to group them a bit so I don't have a switch case
+ * for every single possible message.
+ */
 public final class LogPatternParser {
 
     private static final Logger logger = LogManager.getLogger(LogPatternParser.class);
@@ -38,17 +43,16 @@ public final class LogPatternParser {
      * Group 5: Initial Print
      * INITIAL
      * MAP_NAME,GAME_MODE,[Team_1_Players],[Team_2_Players]
-     *
      */
     public static final LogPattern parseLine(String line) {
-        if (!line.contains(PREFIX)){
+        if (!line.contains(PREFIX)) {
             return null;
         }
         String lineMinusPrefix = line.substring(line.indexOf(PREFIX) + PREFIX.length());
         String[] tokens = lineMinusPrefix.split(",");
 
         // 173.29 seconds --> 173290 milliseconds
-        int millisecondsSinceStart = Integer.parseInt(tokens[0].replace(".","")) * 10;
+        int millisecondsSinceStart = Integer.parseInt(tokens[0].replace(".", "")) * 10;
         LogPatternType type = LogPatternType.valueOf(tokens[1]);
 
         String justRemainingData = String.join(",", Arrays.asList(tokens).subList(2, tokens.length));
@@ -79,9 +83,8 @@ public final class LogPatternParser {
                     parsedLine = null;
             }
             return parsedLine;
-        }
-        catch (Exception e){
-            logger.warn("Unable to parse the following: " + line);
+        } catch (Exception e) {
+            logger.warn("Unable to parse the following line: " + line);
         }
         return null;
     }

@@ -8,10 +8,12 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Exists to parse canonical mode information from a file, needs to be retooled
+ */
 public class ParseModeData {
 
     private static final Logger logger = LogManager.getLogger(ParseModeData.class);
-
 
     public static List<CanonicalMode> parse() {
         //TODO This needs to be done more robustly?
@@ -22,23 +24,20 @@ public class ParseModeData {
             List<CanonicalMode> canonicalModes = new ArrayList<>();
             for (int i = 0; i < lines.size(); i += 2) { // for lines two at a time
                 String modeName = lines.get(i);
-                String teamOrFFA = lines.get(i+1);
+                String teamOrFFA = lines.get(i + 1);
                 boolean teambased;
-                if (teamOrFFA.equals("team")){
+                if (teamOrFFA.equals("team")) {
                     teambased = true;
-                }
-                else if (teamOrFFA.equals("free-for-all")){
+                } else if (teamOrFFA.equals("free-for-all")) {
                     teambased = false;
-                }
-                else{
+                } else {
                     logger.warn("Improper formatting for Canonical Mode Data text file.");
                     continue;
                 }
                 canonicalModes.add(new CanonicalMode(modeName, teambased));
             }
             return canonicalModes;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             logger.error("Couldn't parse mode names.");
             logger.error(e);
             return null;

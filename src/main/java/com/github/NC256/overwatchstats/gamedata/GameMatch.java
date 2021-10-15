@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This class must never be accessed asynchronously
+ * This class should not be accessed asynchronously
+ * This class represents an Overwatch match and all associated data. It's the entrance point for
+ * anything trying to access specific stats about a given match.
  */
 public class GameMatch {
 
@@ -24,8 +26,6 @@ public class GameMatch {
     public GameMatch(CanonicalGameData gameData) {
         this.gameData = gameData;
     }
-
-
 
     public void parseInitialMessage(List<String> playerNames, String mapName, String gameMode) {
         this.mapName = mapName;
@@ -64,7 +64,8 @@ public class GameMatch {
         if (overflowPlayers.isEmpty()) { // If no overflow then great, add to the set and bail
             players.addAll(generatedPlayers);
             return;
-        } else { // Now we have to update any players that got added early to preserve the data they've already collected
+        } else { // Now we have to update any players that got added early to preserve the data they've already
+            // collected
 
             for (int i = 0; i < overflowPlayers.size(); i++) { //for every player in overflow
                 Player match = null;
@@ -113,16 +114,17 @@ public class GameMatch {
         return p;
     }
 
-    public List<Player> getTeam1Players(){
+    public List<Player> getTeam1Players() {
         return players.stream().filter(x -> x.getTeam() == PlayerTeam.TEAM_1).collect(Collectors.toList());
     }
 
-    public List<Player> getTeam2Players(){
+    public List<Player> getTeam2Players() {
         return players.stream().filter(x -> x.getTeam() == PlayerTeam.TEAM_2).collect(Collectors.toList());
     }
 
     /**
      * Does not return overflow players
+     *
      * @return
      */
     public List<Player> getPlayers() {

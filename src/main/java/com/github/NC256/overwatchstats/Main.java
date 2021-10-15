@@ -50,20 +50,20 @@ public class Main {
         Properties preferences = loadAndValidateProperties();
 
         List<CanonicalHero> heroData = ParseHeroData.parse(); // Canonical game reference data
-        if (heroData == null){
+        if (heroData == null) {
             logger.fatal("Unable to parse hero reference data.");
             System.exit(-1);
         }
 
         List<CanonicalMode> modeData = ParseModeData.parse();
-        if (modeData == null){
+        if (modeData == null) {
             logger.fatal("Unable to parse mode reference data.");
             System.exit(-1);
         }
 
         boolean liveMode = true; // Always automatically switch to newly created files.
         boolean googleSheetsLive = true; // Transmit to Google Sheets
-        if (googleSheetsLive){
+        if (googleSheetsLive) {
             TalkToGoogle.initalize();
         }
 
@@ -71,7 +71,6 @@ public class Main {
         File latestLog;
         LinkedBlockingQueue<String> logStrings;
         GameMatch currentMatch;
-
 
         while (true) {
             // 1. Start the watcher so no files can slip through our net
@@ -85,7 +84,7 @@ public class Main {
             logStrings = new LinkedBlockingQueue<>();
 
             // 3. Set up parsing thread to read from the file directly
-            ConcurrentFileReader reader = new ConcurrentFileReader(latestLog,logStrings);
+            ConcurrentFileReader reader = new ConcurrentFileReader(latestLog, logStrings);
             Thread readerThread = new Thread(reader);
             logger.debug("Starting Thread for ConcurrentFileReader");
             readerThread.start();
@@ -103,15 +102,17 @@ public class Main {
             SpreadsheetInstance sheetInstance = new SpreadsheetInstance(preferences.getProperty("Google_Sheet_ID"),
                     preferences.getProperty("Google_Sheet_Current_Worksheet"),
                     preferences.getProperty("Google_Sheet_Insertion_Cell"));
-            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch, sheetInstance,Integer.parseInt(preferences.getProperty("Transmission_Interval")));
+            ConcurrentSpreadsheetUpdater spreadsheetUpdater = new ConcurrentSpreadsheetUpdater(currentMatch,
+                    sheetInstance, Integer.parseInt(preferences.getProperty("Transmission_Interval")));
             Thread spreadsheetThread = new Thread(spreadsheetUpdater);
             logger.debug("Starting thread for spreadsheet Communication");
             spreadsheetThread.start();
 
-            while (!watcher.hasEventOccurred()){ // While no new file has appeared on sensors
+            while (!watcher.hasEventOccurred()) { // While no new file has appeared on sensors
                 // threads are doing everything for us now...
 
-                //TODO Thread overhaul with a Pool and/or Futures of some kind along with error handling. Something to keep Main from busy waiting
+                //TODO Thread overhaul with a Pool and/or Futures of some kind along with error handling. Something
+                // to keep Main from busy waiting
                 Thread.sleep(2000);
             }
             // New file must have appeared, lets reboot things
@@ -130,7 +131,7 @@ public class Main {
         }
     }
 
-    static File getLatestLogFile (File logDirectory){
+    static File getLatestLogFile(File logDirectory) {
         File[] files = logDirectory.listFiles(File::isFile);
         long lastModifiedTime = Long.MIN_VALUE;
         File latest = null;
@@ -143,16 +144,16 @@ public class Main {
                 }
             }
         }
-        if (latest == null){
+        if (latest == null) {
             logger.fatal("Couldn't find the latest file.");
             System.exit(-1);
         }
         return latest;
     }
 
-    static void generatePropertiesFile () throws IOException {
+    static void generatePropertiesFile() throws IOException {
         Properties preferences = new Properties();
-        preferences.setProperty("Google_Sheet_ID","");
+        preferences.setProperty("Google_Sheet_ID", "");
         preferences.setProperty("Google_Sheet_Current_Worksheet", "Sheet1");
         preferences.setProperty("Google_Sheet_Insertion_Cell", "B2");
         preferences.setProperty("Overwatch_Log_Directory", "C:\\Users\\USERNAME\\Documents\\Overwatch\\Workshop\\");
@@ -164,16 +165,18 @@ public class Main {
     static Properties loadAndValidateProperties() throws IOException {
         Properties preferences = new Properties();
         preferences.load(new FileReader(new File("properties.properties")));
-        if (preferences.stringPropertyNames().size() != 5){
-            logger.fatal("Invalid number of properties, is properties file out of date? Perhaps delete it and let the program generate a new one.");
+        if (preferences.stringPropertyNames().size() != 5) {
+            logger.fatal("Invalid number of properties, is properties file out of date? Perhaps delete it and let the" +
+                    " program generate a new one.");
             System.exit(-1);
         }
-        if (!new File(preferences.getProperty("Overwatch_Log_Directory")).exists()){
+        if (!new File(preferences.getProperty("Overwatch_Log_Directory")).exists()) {
             logger.fatal("Cannot find that log directory! Check your formatting.");
             System.exit(-1);
         }
-        if (Integer.parseInt(preferences.getProperty("Transmission_Interval")) < 1100){
-            logger.error("Cannot transmit to the spreadsheet more frequently than every 1100 milliseconds. Current Transmission_Interval is too short!");
+        if (Integer.parseInt(preferences.getProperty("Transmission_Interval")) < 1100) {
+            logger.error("Cannot transmit to the spreadsheet more frequently than every 1100 milliseconds. Current " +
+                    "Transmission_Interval is too short!");
         }
         //TODO how to test API communication is working?
         return preferences;

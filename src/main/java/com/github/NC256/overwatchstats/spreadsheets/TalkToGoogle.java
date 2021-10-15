@@ -27,6 +27,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class is for all the Google boilerplate code needed to start talking to Sheets.
+ * It must be instantiated, auth it's token, etc, but after that it can transmit when/where needed.
+ */
 public class TalkToGoogle {
     private static final String APPLICATION_NAME = "Overwatch Stats Test";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -42,6 +46,7 @@ public class TalkToGoogle {
 
     /**
      * Creates an authorized Credential object.
+     *
      * @param HTTP_TRANSPORT The network HTTP Transport.
      * @return An authorized Credential object.
      * @throws IOException If the credentials.json file cannot be found.
@@ -66,7 +71,7 @@ public class TalkToGoogle {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    public static void initalize () throws IOException, GeneralSecurityException {
+    public static void initalize() throws IOException, GeneralSecurityException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -83,8 +88,9 @@ public class TalkToGoogle {
                 .execute();
     }
 
-    public static List<String> getWorksheetNames (String spreadsheetId) throws IOException {
-        Spreadsheet response = service.spreadsheets().get(spreadsheetId).setFields("sheets.properties").setIncludeGridData(false).execute();
+    public static List<String> getWorksheetNames(String spreadsheetId) throws IOException {
+        Spreadsheet response =
+                service.spreadsheets().get(spreadsheetId).setFields("sheets.properties").setIncludeGridData(false).execute();
         List<Sheet> workSheetList = response.getSheets();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (Sheet sheet : workSheetList) {

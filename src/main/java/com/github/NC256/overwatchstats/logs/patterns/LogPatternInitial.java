@@ -33,6 +33,6 @@ public class LogPatternInitial extends LogPattern {
 
     @Override
     public void updateStats(GameMatch match) {
-        match.parseInitialMessage(playerNames,mapName,modeName);
+        match.parseInitialMessage(playerNames, mapName, modeName);
     }
 }

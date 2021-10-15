@@ -8,20 +8,24 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ConcurrentLogParser implements Runnable{
+/**
+ * This class takes strings out of the LinkedBlockingQueue and tries to
+ * parse each one into a LogPattern object. Then it tries to let that object
+ * parse its stats into the current ongoing game
+ */
+public class ConcurrentLogParser implements Runnable {
 
     private final LinkedBlockingQueue<String> strings;
     private final GameMatch match;
     private final Logger logger = LogManager.getLogger(this);
 
-
-    public ConcurrentLogParser(LinkedBlockingQueue<String> strings, GameMatch match){
+    public ConcurrentLogParser(LinkedBlockingQueue<String> strings, GameMatch match) {
         logger.info("Instantiated with queue and GameMatch instance.");
         this.strings = strings;
         this.match = match;
     }
 
-    public GameMatch getGameInstance (){
+    public GameMatch getGameInstance() {
         return match;
     }
 
@@ -34,19 +38,18 @@ public class ConcurrentLogParser implements Runnable{
             while (true) {
                 line = strings.take(); // can be interrupted
                 message = LogPatternParser.parseLine(line);
-                if (message != null){
-                    synchronized (match){ // Need to make sure nothing is reading data while we are in the middle of writing it
+                if (message != null) {
+                    synchronized (match) { // Need to make sure nothing is reading data while we are in the middle of
+                        // writing it
                         try {
                             message.updateStats(match);
-                        }
-                        catch (Exception e){
+                        } catch (Exception e) {
                             logger.warn("Unable to update stats for the following: " + line);
                         }
                     }
                 }
             }
-        }
-        catch (InterruptedException e){
+        } catch (InterruptedException e) {
             logger.warn(e);
         }
     }

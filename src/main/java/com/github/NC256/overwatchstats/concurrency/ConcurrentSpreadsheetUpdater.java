@@ -7,22 +7,24 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
-public class ConcurrentSpreadsheetUpdater implements Runnable{
+/**
+ * This class exists to send updates to Google Sheets at regular intervals.
+ * All it does is call collectAndTransmit() at whatever the specified interval is and catch any errors
+ */
+public class ConcurrentSpreadsheetUpdater implements Runnable {
 
     final GameMatch match;
     final SpreadsheetInstance sheet;
     int transmitIntervalMilliseconds;
     private final Logger logger = LogManager.getLogger(this);
 
-
-    public ConcurrentSpreadsheetUpdater (GameMatch match, SpreadsheetInstance sheet, int transmitIntervalMilliseconds){
+    public ConcurrentSpreadsheetUpdater(GameMatch match, SpreadsheetInstance sheet, int transmitIntervalMilliseconds) {
         this.match = match;
         this.sheet = sheet;
-        if (transmitIntervalMilliseconds < 1100){
+        if (transmitIntervalMilliseconds < 1100) {
             logger.debug("Received transmission interval too short, defaulting to 1100ms.");
             this.transmitIntervalMilliseconds = 1100;
-        }
-        else {
+        } else {
             this.transmitIntervalMilliseconds = transmitIntervalMilliseconds;
         }
     }
@@ -35,15 +37,13 @@ public class ConcurrentSpreadsheetUpdater implements Runnable{
         while (true) {
             try {
                 Thread.sleep(transmitIntervalMilliseconds);
-                synchronized (match){ // Don't want stats changing while collecting them for transmit
+                synchronized (match) { // Don't want stats changing while collecting them for transmit
                     sheet.collectAndTransmit(match);
                 }
-            }
-            catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 logger.warn(e);
                 return;
-            }
-            catch (IOException ioException){
+            } catch (IOException ioException) {
                 logger.error("Unable to transmit to spreadsheet");
                 logger.error(ioException);
             }

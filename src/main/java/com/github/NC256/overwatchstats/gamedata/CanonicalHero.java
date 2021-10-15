@@ -2,24 +2,23 @@ package com.github.NC256.overwatchstats.gamedata;
 
 import java.util.List;
 
-public class CanonicalHero implements Hero {
+public class CanonicalHero {
 
     private final String name;
     private final List<CanonicalAbility> abilityNames;
 
-    public CanonicalHero(String name, List<CanonicalAbility> abilityNames){
+    public CanonicalHero(String name, List<CanonicalAbility> abilityNames) {
         this.name = name;
         this.abilityNames = abilityNames;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    public String getAbilityName (OverwatchAbilityEvent eventType){
+    public String getAbilityName(OverwatchAbilityEvent eventType) {
         for (CanonicalAbility abilityName : abilityNames) {
-            if (abilityName.eventType == eventType){
+            if (abilityName.eventType == eventType) {
                 return abilityName.abilityName;
             }
         }

@@ -8,6 +8,9 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Exists to parse canonical hero info from a file, needs to be retooled
+ */
 public class ParseHeroData {
     private static final Logger logger = LogManager.getLogger(ParseHeroData.class);
 
@@ -24,13 +27,13 @@ public class ParseHeroData {
                 List<CanonicalAbility> canonicalNamePairs = new ArrayList<>();
                 for (String abilityPair : abilityPairs) { // Each pair is "Name:Ability_Type", needs splitting
                     String[] pair = abilityPair.split(";");
-                    canonicalNamePairs.add(new CanonicalAbility(pair[0].trim(), OverwatchAbilityEvent.stringToEnum(pair[1].trim())));
+                    canonicalNamePairs.add(new CanonicalAbility(pair[0].trim(),
+                            OverwatchAbilityEvent.stringToEnum(pair[1].trim())));
                 }
                 heroes.add(new CanonicalHero(heroName, canonicalNamePairs));
             }
             return heroes;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             logger.error("Couldn't parse hero ability names.");
             logger.error(e);
             return null;

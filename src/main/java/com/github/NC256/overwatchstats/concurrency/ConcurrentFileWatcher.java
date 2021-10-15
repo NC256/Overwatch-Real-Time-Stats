@@ -12,17 +12,17 @@ import java.nio.file.WatchService;
 /**
  * This class watches a folder for new files being created using Java's built-in
  * Watchservice classes.
- * When it is notifed by an event it will set it's own flag to true.
+ * When it is notified by an event it will set its own flag to true.
  * No other logic or processing occurs here.
  */
-public class ConcurrentFileWatcher implements Runnable{
+public class ConcurrentFileWatcher implements Runnable {
 
     private volatile boolean serviceEvent = false;
     private final Path folder;
     private final Logger logger = LogManager.getLogger(this);
 
 
-    public ConcurrentFileWatcher(Path folder){
+    public ConcurrentFileWatcher(Path folder) {
         logger.info("Instantiated with folder: " + folder.toString());
         this.folder = folder;
     }
@@ -31,11 +31,11 @@ public class ConcurrentFileWatcher implements Runnable{
     @Override
     public void run() {
         logger.info("Entering run()");
-        try{
+        try {
             WatchService ws = folder.getFileSystem().newWatchService();
             folder.register(ws, StandardWatchEventKinds.ENTRY_CREATE); //watching for new files
             WatchKey wk = null;
-            while (wk == null){
+            while (wk == null) {
                 wk = ws.take(); // Can be interrupted
             }
             serviceEvent = true;
@@ -45,19 +45,18 @@ public class ConcurrentFileWatcher implements Runnable{
             // watch services being in existence and we miss it or something silly like that
 
             //TODO there has got to be a better way to architecture this
-            while (true){ // Spin wheels while waiting for main to read our status?
-                if (Thread.currentThread().isInterrupted()){
+            while (true) { // Spin wheels while waiting for main to read our status?
+                if (Thread.currentThread().isInterrupted()) {
                     throw new InterruptedException();
                 }
             }
-        }
-        catch (IOException | InterruptedException e){
+        } catch (IOException | InterruptedException e) {
             logger.warn(e);
         }
         logger.info("Exiting run()");
     }
 
-    public boolean hasEventOccurred(){
+    public boolean hasEventOccurred() {
         return serviceEvent;
     }
 }

@@ -5,7 +5,7 @@ package com.github.NC256.overwatchstats.spreadsheets;
  */
 public class SpreadsheetLayout {
 
-    public SpreadsheetLayout(){
+    public SpreadsheetLayout() {
 
     }
 }

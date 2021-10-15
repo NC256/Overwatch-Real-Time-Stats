@@ -1,6 +1,8 @@
 package com.github.NC256.overwatchstats.gamedata;
 
-
+/**
+ * This class represents the hero character a particular player is playing, and serves to host all related stats
+ */
 public class PlayerHero {
     CanonicalHero hero;
     private int timePlayed = 0, objectiveTime = 0; //in seconds
@@ -9,7 +11,7 @@ public class PlayerHero {
     private int ability1Uses = 0, ability2Uses = 0, ultimateUses = 0, crouchUses = 0;
     // barrier damage, solo kills, objective kills, environmental kills, weapon accuracy?
 
-    public PlayerHero(CanonicalHero hero){
+    public PlayerHero(CanonicalHero hero) {
         this.hero = hero;
     }
 
@@ -125,24 +127,24 @@ public class PlayerHero {
         this.crouchUses = crouchUses;
     }
 
-    public void incrementAbility1Uses(){
+    public void incrementAbility1Uses() {
         ability1Uses++;
     }
 
-    public void incrementAbility2Uses(){
+    public void incrementAbility2Uses() {
         ability2Uses++;
     }
 
-    public void incrementUltimateUses(){
+    public void incrementUltimateUses() {
         ultimateUses++;
     }
 
-    public void incrementCrouchUses(){
+    public void incrementCrouchUses() {
         crouchUses++;
     }
 
     public void incrementAbilityUse(OverwatchAbilityEvent event) {
-        switch (event){
+        switch (event) {
             case PRIMARY_FIRE:
                 break;
             case SECONDARY_FIRE:
@@ -162,20 +164,20 @@ public class PlayerHero {
         }
     }
 
-    public void incrementDamageDone(double value){
-        damageDone+=value;
+    public void incrementDamageDone(double value) {
+        damageDone += value;
     }
 
-    public void incrementDamageReceived(double value){
-        damageReceived+=value;
+    public void incrementDamageReceived(double value) {
+        damageReceived += value;
     }
 
-    public void incrementHealingDone(double value){
-        healingDone+=value;
+    public void incrementHealingDone(double value) {
+        healingDone += value;
     }
 
-    public void incrementHealingReceived(double value){
-        healingReceived+=value;
+    public void incrementHealingReceived(double value) {
+        healingReceived += value;
     }
 
     public void incrementElimnations() {

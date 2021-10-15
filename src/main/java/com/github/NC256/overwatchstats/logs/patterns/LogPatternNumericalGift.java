@@ -13,12 +13,12 @@ import org.apache.logging.log4j.Logger;
 public class LogPatternNumericalGift extends LogPattern {
 
     private final Logger logger = LogManager.getLogger(this);
-    private String gifter;
-    private String gifterHero;
-    private OverwatchAbilityEvent ability;
-    private float amountGifted;
-    private String receiver;
-    private String receiverHero;
+    private final String gifter;
+    private final String gifterHero;
+    private final OverwatchAbilityEvent ability;
+    private final float amountGifted;
+    private final String receiver;
+    private final String receiverHero;
 
     public LogPatternNumericalGift(int millisecondsSinceStart, LogPatternType type, String line) {
         super(millisecondsSinceStart, type);
@@ -33,15 +33,13 @@ public class LogPatternNumericalGift extends LogPattern {
 
     @Override
     public void updateStats(GameMatch match) {
-        if (super.getMessageType() == LogPatternType.DAMAGE_DEALT){
+        if (super.getMessageType() == LogPatternType.DAMAGE_DEALT) {
             match.getPlayerByName(gifter).getHeroByName(gifterHero).incrementDamageDone(amountGifted);
             match.getPlayerByName(receiver).getHeroByName(receiverHero).incrementDamageReceived(amountGifted);
-        }
-        else if (super.getMessageType() == LogPatternType.HEAL_DEALT){
+        } else if (super.getMessageType() == LogPatternType.HEAL_DEALT) {
             match.getPlayerByName(gifter).getHeroByName(gifterHero).incrementHealingDone(amountGifted);
             match.getPlayerByName(receiver).getHeroByName(receiverHero).incrementHealingReceived(amountGifted);
-        }
-        else{
+        } else {
             logger.warn("Expected Damage or Healing, instantiated with neither.");
         }
     }

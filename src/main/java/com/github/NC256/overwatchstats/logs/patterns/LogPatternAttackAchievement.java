@@ -27,13 +27,11 @@ public class LogPatternAttackAchievement extends LogPattern {
     @Override
     public void updateStats(GameMatch match) {
         // Deaths are counted by the DEATH event, don't double-count here!
-        if (super.getMessageType() == LogPatternType.ELIM){
+        if (super.getMessageType() == LogPatternType.ELIM) {
             match.getPlayerByName(attackerName).getHeroByName(attackerHero).incrementElimnations();
-        }
-        else if (super.getMessageType() == LogPatternType.FINAL_BLOW){
+        } else if (super.getMessageType() == LogPatternType.FINAL_BLOW) {
             match.getPlayerByName(attackerName).getHeroByName(attackerHero).incrementFinalBlows();
-        }
-        else{
+        } else {
             logger.warn("Unexpected logPattern type.");
         }
     }

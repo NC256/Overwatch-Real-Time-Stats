@@ -18,7 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * All lines of text from the file are stored into a ConcurrentLinkedQueue for processing elsewhere.
  * No other logic is implemented here. This class can be interrupted and shut down remotely.
  */
-public class ConcurrentFileReader implements Runnable{
+public class ConcurrentFileReader implements Runnable {
 
     private final File log;
     private final LinkedBlockingQueue<String> strings;
@@ -30,13 +30,13 @@ public class ConcurrentFileReader implements Runnable{
         strings = new LinkedBlockingQueue<String>();
     }
 
-    public ConcurrentFileReader(File log, LinkedBlockingQueue<String> strings){
+    public ConcurrentFileReader(File log, LinkedBlockingQueue<String> strings) {
         logger.info("Instantiated with Queue and pointing to file " + log.getAbsolutePath());
         this.log = log;
         this.strings = strings;
     }
 
-    public LinkedBlockingQueue<String> getSharedQueue (){
+    public LinkedBlockingQueue<String> getSharedQueue() {
         return strings;
     }
 
@@ -44,12 +44,13 @@ public class ConcurrentFileReader implements Runnable{
     //@SuppressWarnings("InfiniteLoopStatement")
     public void run() {
         logger.debug("Entering run() method.");
-        try{
+        try {
             InputStream is = Files.newInputStream(log.toPath(), StandardOpenOption.READ);
             BufferedReader lineReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             while (true) {
                 String line = lineReader.readLine();
-                if (line == null){ // TODO blocking file reads are apparently really difficult, is this the best solution?
+                if (line == null) { // TODO blocking file reads are apparently really difficult, is this the best
+                    // solution?
                     Thread.sleep(250);
                     continue;
                 }
@@ -57,8 +58,7 @@ public class ConcurrentFileReader implements Runnable{
                     strings.put(line); // can be interrupted
                 }
             }
-        }
-        catch (IOException | InterruptedException e){
+        } catch (IOException | InterruptedException e) {
             logger.warn(e);
         }
         logger.debug("Exiting run() method.");
