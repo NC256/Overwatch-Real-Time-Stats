@@ -39,7 +39,7 @@ public class ParseModeData {
             return canonicalModes;
         }
         catch (Exception e){
-            logger.error("Couldn't parse mode names.");
+            logger.error("Couldn't parse gamemode names.");
             logger.error(e);
             return null;
         }

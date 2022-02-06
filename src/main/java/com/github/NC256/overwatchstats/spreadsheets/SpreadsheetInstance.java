@@ -42,7 +42,7 @@ public class SpreadsheetInstance {
             data.get(6).add(0, System.currentTimeMillis());
         }
         catch (Exception e){
-            logger.error("Error packing data for spreadsheet!");
+            logger.error("Error packing data for spreadsheet transmission!");
             logger.error(e);
             return;
         }

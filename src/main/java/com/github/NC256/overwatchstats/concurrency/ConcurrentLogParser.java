@@ -40,7 +40,7 @@ public class ConcurrentLogParser implements Runnable{
                             message.updateStats(match);
                         }
                         catch (Exception e){
-                            logger.warn("Unable to update stats for the following: " + line);
+                            logger.warn("Unable to parse stats for the following line: " + line);
                         }
                     }
                 }

@@ -32,15 +32,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException, GeneralSecurityException {
 
-        Configurator.setRootLevel(Level.DEBUG);
-
-        logger.trace("Trace Message!");
-        logger.debug("Debug Message!");
-        logger.info("Info Message!");
-        logger.warn("Warn Message!");
-        logger.error("Error Message!");
-        logger.fatal("Fatal Message!");
-        System.out.println("Logger should have already logged");
+        Configurator.setRootLevel(Level.WARN);
 
         if (!new File("properties.properties").exists()) {
             generatePropertiesFile();
@@ -51,20 +43,20 @@ public class Main {
 
         List<CanonicalHero> heroData = ParseHeroData.parse(); // Canonical game reference data
         if (heroData == null){
-            logger.fatal("Unable to parse hero reference data.");
+            logger.fatal("Unable to parse hero reference data. Is the file missing?");
             System.exit(-1);
         }
 
         List<CanonicalMode> modeData = ParseModeData.parse();
         if (modeData == null){
-            logger.fatal("Unable to parse mode reference data.");
+            logger.fatal("Unable to parse gamemode reference data. Is the file missing?");
             System.exit(-1);
         }
 
         boolean liveMode = true; // Always automatically switch to newly created files.
         boolean googleSheetsLive = true; // Transmit to Google Sheets
         if (googleSheetsLive){
-            TalkToGoogle.initalize();
+            TalkToGoogle.initalize(new File(preferences.getProperty("Google_Credentials_File_Location")));
         }
 
         File logDirectory = new File(preferences.getProperty("Overwatch_Log_Directory"));
@@ -144,7 +136,7 @@ public class Main {
             }
         }
         if (latest == null){
-            logger.fatal("Couldn't find the latest file.");
+            logger.fatal("Couldn't find the latest log file. Is the directory location correct? Are there logs in it?");
             System.exit(-1);
         }
         return latest;
@@ -157,6 +149,7 @@ public class Main {
         preferences.setProperty("Google_Sheet_Insertion_Cell", "B2");
         preferences.setProperty("Overwatch_Log_Directory", "C:\\Users\\USERNAME\\Documents\\Overwatch\\Workshop\\");
         preferences.setProperty("Transmission_Interval", "2000");
+        preferences.setProperty("Google_Credentials_File_Location", "C:\\Folder\\credentials.json");
         preferences.store(new FileWriter(new File("properties.properties")), "Documentation on Github.");
         return;
     }
@@ -164,16 +157,16 @@ public class Main {
     static Properties loadAndValidateProperties() throws IOException {
         Properties preferences = new Properties();
         preferences.load(new FileReader(new File("properties.properties")));
-        if (preferences.stringPropertyNames().size() != 5){
+        if (preferences.stringPropertyNames().size() != 6){
             logger.fatal("Invalid number of properties, is properties file out of date? Perhaps delete it and let the program generate a new one.");
             System.exit(-1);
         }
         if (!new File(preferences.getProperty("Overwatch_Log_Directory")).exists()){
-            logger.fatal("Cannot find that log directory! Check your formatting.");
+            logger.fatal("Cannot find the log directory. Check you've set the path properly in the properties file.");
             System.exit(-1);
         }
         if (Integer.parseInt(preferences.getProperty("Transmission_Interval")) < 1100){
-            logger.error("Cannot transmit to the spreadsheet more frequently than every 1100 milliseconds. Current Transmission_Interval is too short!");
+            logger.error("Cannot transmit to the spreadsheet more frequently than every 1100 milliseconds. Current Transmission_Interval property is too short!");
         }
         //TODO how to test API communication is working?
         return preferences;

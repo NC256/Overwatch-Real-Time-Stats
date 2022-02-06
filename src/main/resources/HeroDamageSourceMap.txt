@@ -28,7 +28,7 @@ Hanzo
 Storm Bow;Primary Fire, Sonic Arrow;Ability 1, Storm Arrow;Ability 2, Dragonstrike;Ultimate
 Junkrat
 Frag Launcher;Primary Fire, Concussion Mine;Ability 1, Steel Trap;Ability 2, RIP-Tire;Ultimate
-McCree
+Cassidy
 Peacekeeper;Primary Fire, Flashbang;Ability 2, Deadeye; Ultimate
 Mei
 Endothermic Blaster;Primary Fire, Endothermic Blaster;Secondary Fire, Blizzard;Ultimate

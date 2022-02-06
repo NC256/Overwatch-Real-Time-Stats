@@ -17,6 +17,7 @@ import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -46,11 +47,12 @@ public class TalkToGoogle {
      * @return An authorized Credential object.
      * @throws IOException If the credentials.json file cannot be found.
      */
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, File credentials) throws IOException {
         // Load client secrets.
         //InputStream in = TalkToGoogle.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-        InputStream in = new FileInputStream("C:\\All\\Programming\\Projects\\Overwatch Stats Proof of " +
-                "Concept\\src\\main\\java\\com\\github\\NC256\\overwatchstats\\spreadsheets\\credentials.json");
+//        InputStream in = new FileInputStream("C:\\All\\Programming\\Projects\\Overwatch Stats Proof of " +
+//                "Concept\\src\\main\\java\\com\\github\\NC256\\overwatchstats\\spreadsheets\\credentials.json");
+        InputStream in = new FileInputStream(credentials);
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
@@ -66,10 +68,10 @@ public class TalkToGoogle {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    public static void initalize () throws IOException, GeneralSecurityException {
+    public static void initalize (File credentialsFile) throws IOException, GeneralSecurityException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+        service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT, credentialsFile))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
